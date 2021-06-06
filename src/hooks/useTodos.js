@@ -31,28 +31,30 @@ export default function useTodos() {
     addTodosToLocalStorage(todos);
   }, [todos]);
 
-  const handleNewTodo = (conditions) => {
-    if (conditions) {
-      setTodos([
-        {
-          id: id.current,
-          content: newTodo.trim(),
-          isCompleted: false,
-          isEditing: false,
-        },
-        ...todos,
-      ]);
-      setNewTodo('');
-      id.current++;
-    }
+  const handleNewTodo = () => {
+    setTodos([
+      {
+        id: id.current,
+        content: newTodo.trim(),
+        isCompleted: false,
+        isEditing: false,
+      },
+      ...todos,
+    ]);
+    setNewTodo('');
+    id.current++;
   };
 
   const handleNewTodoClick = () => {
-    handleNewTodo(newTodo.trim() !== '');
+    if (newTodo.trim() !== '') {
+      handleNewTodo();
+    }
   };
 
   const handleNewTodoKeyDown = (event) => {
-    handleNewTodo(newTodo.trim() !== '' && event.key === 'Enter');
+    if (newTodo.trim() !== '' && event.key === 'Enter') {
+      handleNewTodo();
+    }
   };
 
   const handleDeleteTodo = (id) => {
@@ -76,6 +78,18 @@ export default function useTodos() {
     );
   };
 
+  const updateTodo = (data) => {
+    setTodos(
+      todos.map((todo) => {
+        if (!todo.isEditing) return todo;
+        return {
+          ...todo,
+          ...data,
+        };
+      })
+    );
+  };
+
   const handleEditingTodo = (id) => {
     setTodos(
       todos.map((todo) => {
@@ -92,47 +106,24 @@ export default function useTodos() {
   const handleEditingTodoBlur = (event) => {
     if (event.target.value === '') return;
 
-    setTodos(
-      todos.map((todo) => {
-        if (!todo.isEditing) return todo;
-
-        return {
-          ...todo,
-          content: event.target.value.trim(),
-          isEditing: false,
-        };
-      })
-    );
+    updateTodo({
+      content: event.target.value.trim(),
+      isEditing: false,
+    });
   };
 
   const handleEditingTodoKeyDown = (event) => {
     if (event.target.value === '') return;
 
     if (event.key === 'Escape' || event.key === 'Esc') {
-      setTodos(
-        todos.map((todo) => {
-          if (!todo.isEditing) return todo;
-
-          return {
-            ...todo,
-            isEditing: false,
-          };
-        })
-      );
+      updateTodo({ isEditing: false });
     }
 
     if (event.key === 'Enter') {
-      setTodos(
-        todos.map((todo) => {
-          if (!todo.isEditing) return todo;
-
-          return {
-            ...todo,
-            content: event.target.value.trim(),
-            isEditing: false,
-          };
-        })
-      );
+      updateTodo({
+        content: event.target.value.trim(),
+        isEditing: false,
+      });
     }
   };
 
